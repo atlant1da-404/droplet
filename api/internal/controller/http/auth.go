@@ -54,7 +54,7 @@ func (e signInResponseError) Error() *httpResponseError {
 // @Param        fields body signInRequestBody true "data"
 // @Success      200 {object} signInResponseBody
 // @Failure      422,500 {object} signInResponseError
-// @Router       /sign-up [POST]
+// @Router       /sign-in [POST]
 func (a *authRouter) signIn(c *gin.Context) (interface{}, *httpResponseError) {
 	logger := a.logger.Named("signIn").WithContext(c)
 

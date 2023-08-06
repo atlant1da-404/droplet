@@ -1,0 +1,112 @@
+definitions:
+  signInRequestBody:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  signInResponseBody:
+    properties:
+      accessToken:
+        type: string
+    type: object
+  signInResponseError:
+    properties:
+      code:
+        enum:
+        - user_not_found
+        - wrong_password
+        type: string
+      message:
+        type: string
+    type: object
+  signUpRequestBody:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  signUpResponseBody:
+    properties:
+      accessToken:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      username:
+        type: string
+    type: object
+  signUpResponseError:
+    properties:
+      code:
+        enum:
+        - user_already_created
+        type: string
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /sign-in:
+    post:
+      consumes:
+      - application/json
+      operationId: SignIn
+      parameters:
+      - description: data
+        in: body
+        name: fields
+        required: true
+        schema:
+          $ref: '#/definitions/signInRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/signInResponseBody'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/signInResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/signInResponseError'
+      summary: Login user.
+  /sign-up:
+    post:
+      consumes:
+      - application/json
+      operationId: SignUp
+      parameters:
+      - description: data
+        in: body
+        name: fields
+        required: true
+        schema:
+          $ref: '#/definitions/signUpRequestBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/signUpResponseBody'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/signUpResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/signUpResponseError'
+      summary: Creates and returns user.
+swagger: "2.0"
