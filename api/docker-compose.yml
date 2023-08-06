@@ -1,0 +1,31 @@
+version: "3.8"
+services:
+  api:
+    build:
+      context: .
+      dockerfile: local.Dockerfile
+    environment:
+      - APP_BASE_URL=${APP_BASE_URL}
+      - POSTGRESQL_HOST=${POSTGRESQL_HOST}
+      - POSTGRESQL_USER=${POSTGRESQL_USER}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
+      - JWT_SIGN_KEY=${JWT_SIGN_KEY}
+
+    ports:
+      - 8082:8082
+
+  postgresdb:
+    image: postgres:14.4-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=api
+    volumes:
+      - postgresQC:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+volumes:
+  api:
+  postgresQC:
+    driver: local

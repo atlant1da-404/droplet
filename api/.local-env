@@ -1,0 +1,8 @@
+POSTGRESQL_HOST="host.docker.internal"
+POSTGRESQL_USER="postgres"
+POSTGRESQL_PASSWORD="postgres"
+POSTGRESQL_DATABASE="api"
+
+APP_BASE_URL="http://localhost:8082"
+LOG_LEVEL="debug"
+JWT_SIGN_KEY="sajkdjk1ndansdnan"
