@@ -10,7 +10,7 @@ on:
 
 defaults:
   run:
-    working-directory: api
+    working-directory: ./api
 
 jobs:
   static:
@@ -24,16 +24,18 @@ jobs:
         if: always()
         uses: golangci/golangci-lint-action@v3
         with:
-          working-directory: api
+          working-directory: ./api
           only-new-issues: true
           args: --timeout=3m
 
       - name: Install go mods
         if: always()
+        working-directory: ./api
         run: go mod download
 
       - name: Run go vet
         if: always()
+        working-directory: ./api
         run: "go vet ./..."
 
       - name: Run staticcheck
@@ -41,4 +43,4 @@ jobs:
         uses: dominikh/staticcheck-action@v1.2.0
         with:
           install-go: false
-          working-directory: api
+          working-directory: ./api
