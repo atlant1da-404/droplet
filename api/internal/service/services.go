@@ -44,9 +44,10 @@ type SignInOutput struct {
 }
 
 type SignUpOptions struct {
-	Username string
-	Email    string
-	Password string
+	Username   string
+	Email      string
+	Password   string
+	MacAddress string
 }
 
 type SignUpOutput struct {

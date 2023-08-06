@@ -83,7 +83,7 @@ func (a authService) SignUp(ctx context.Context, opt *SignUpOptions) (*SignUpOut
 		return nil, fmt.Errorf("failed to hash user: %w", err)
 	}
 
-	createdUser, err := a.storages.UserStorage.CreateUser(ctx, &entity.User{Email: opt.Email, Password: hashedPassword, Username: opt.Username})
+	createdUser, err := a.storages.UserStorage.CreateUser(ctx, &entity.User{Email: opt.Email, Password: hashedPassword, Username: opt.Username, MacAddress: opt.MacAddress})
 	if err != nil {
 		logger.Error("failed to create user: ", err)
 		return nil, fmt.Errorf("failed to create user: %w", err)
