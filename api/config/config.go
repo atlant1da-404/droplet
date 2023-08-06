@@ -15,7 +15,6 @@ type (
 		HTTP       HTTP
 		Log        Log
 		PostgreSQL PostgreSQL
-		Swagger    Swagger
 	}
 
 	// App - represent application configuration.
@@ -43,12 +42,6 @@ type (
 
 	JWT struct {
 		SignKey string `env:"JWT_SIGN_KEY"     env-default:"sajkdjk1ndansdnan"`
-	}
-
-	Swagger struct {
-		Enabled  bool   `env:"QC_SWAGGER_SERVICE_ENABLED" env-default:"true"`
-		Username string `env:"QC_SWAGGER_AUTH_USERNAME" env-default:"team"`
-		Password string `env:"QC_SWAGGER_AUTH_PASSWORD" env-default:"qwerty"`
 	}
 )
 
