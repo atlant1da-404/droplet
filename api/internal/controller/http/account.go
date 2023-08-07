@@ -101,6 +101,14 @@ func (e getAccountResponseError) Error() *httpResponseError {
 	}
 }
 
+// @id           GetAccount
+// @Summary      Gets account.
+// @Accept       application/json
+// @Produce      application/json
+// @Param        id path string true "Account ID"
+// @Success      200 {object} getAccountResponseBody
+// @Failure      422,500 {object} getAccountResponseError
+// @Router       /account/{id} [PUT]
 func (a *accountRouter) getAccount(c *gin.Context) (interface{}, *httpResponseError) {
 	logger := a.logger.Named("getAccount").WithContext(c)
 
