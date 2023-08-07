@@ -19,7 +19,7 @@ import (
 )
 
 func Run(cfg *config.Config) {
-	lgr := logger.New(cfg.Log.Level)
+	log := logger.New(cfg.Log.Level)
 
 	sql, err := database.NewPostgreSQL(database.PostgreSQLConfig{
 		User:     cfg.PostgreSQL.User,
@@ -28,7 +28,7 @@ func Run(cfg *config.Config) {
 		Database: cfg.PostgreSQL.Database,
 	})
 	if err != nil {
-		lgr.Fatal("failed to init postgresql", "err", err)
+		log.Fatal("failed to init postgresql", "err", err)
 	}
 
 	err = sql.DB.AutoMigrate(
@@ -38,7 +38,7 @@ func Run(cfg *config.Config) {
 		&entity.AccountSettings{},
 	)
 	if err != nil {
-		lgr.Fatal("automigration failed", "err", err)
+		log.Fatal("automigration failed", "err", err)
 	}
 
 	storages := service.Storages{
@@ -53,7 +53,7 @@ func Run(cfg *config.Config) {
 	serviceOptions := &service.Options{
 		Storages: &storages,
 		Config:   cfg,
-		Logger:   lgr,
+		Logger:   log,
 		Hash:     hash.NewHash(),
 		Auth:     auth.NewAuth(),
 	}
@@ -63,13 +63,12 @@ func Run(cfg *config.Config) {
 		AccountService: service.NewAccountService(serviceOptions),
 	}
 
-	// init http handler
 	httpHandler := gin.New()
 
 	controller.New(&controller.Options{
 		Handler:  httpHandler,
 		Services: services,
-		Logger:   lgr,
+		Logger:   log,
 		Config:   cfg,
 	})
 
@@ -87,23 +86,21 @@ func Run(cfg *config.Config) {
 
 	select {
 	case s := <-interrupt:
-		lgr.Info("app - Run - signal: " + s.String())
+		log.Info("app - Run - signal: " + s.String())
 
 	case err = <-httpServer.Notify():
-		lgr.Error("app - Run - httpServer.Notify", "err", err)
+		log.Error("app - Run - httpServer.Notify", "err", err)
 	}
 
-	// shutdown http server
 	err = httpServer.Shutdown()
 	if err != nil {
-		lgr.Error("app - Run - httpServer.Shutdown", "err", err)
+		log.Error("app - Run - httpServer.Shutdown", "err", err)
 	}
 
-	// close connections to databases
 	for _, db := range databases {
 		err = db.Close()
 		if err != nil {
-			lgr.Error("app - Run - db.Close", "err", err)
+			log.Error("app - Run - db.Close", "err", err)
 		}
 	}
 }

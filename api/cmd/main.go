@@ -8,10 +8,10 @@ import (
 )
 
 func main() {
-	lgr := logger.New("main")
+	log := logger.New("main")
 
 	cfg := config.Get()
-	lgr.Info("read config", "config", cfg)
+	log.Info("read config", "config", cfg)
 
 	app.Run(cfg)
 }

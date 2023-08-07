@@ -40,6 +40,7 @@ type (
 		Database string `env:"POSTGRESQL_DATABASE" env-default:"api"`
 	}
 
+	// JWT - represents jwt configuration.
 	JWT struct {
 		SignKey string `env:"JWT_SIGN_KEY"     env-default:"sajkdjk1ndansdnan"`
 	}
