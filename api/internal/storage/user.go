@@ -20,8 +20,7 @@ func NewUserStorage(postgresql *database.PostgreSQL) service.UserStorage {
 }
 
 func (u userStorage) GetUser(ctx context.Context, filter *service.GetUserFilter) (*entity.User, error) {
-	stmt := u.DB.
-		Preload(clause.Associations)
+	stmt := u.DB.Preload(clause.Associations)
 
 	if filter.Email != "" {
 		stmt = stmt.Where(entity.User{Email: filter.Email})

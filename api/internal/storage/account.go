@@ -29,8 +29,7 @@ func (u *accountStorage) CreateAccount(ctx context.Context, account *entity.Acco
 }
 
 func (u *accountStorage) GetAccount(ctx context.Context, filter *service.GetAccountFilter) (*entity.Account, error) {
-	stmt := u.DB.
-		Preload(clause.Associations)
+	stmt := u.DB.Preload(clause.Associations)
 
 	if filter.AccountId != "" {
 		stmt = stmt.Where(entity.Account{Id: filter.AccountId})
