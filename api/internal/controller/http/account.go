@@ -13,7 +13,7 @@ type accountRouter struct {
 }
 
 func setupAccountRoutes(options RouterOptions) {
-	accRouter := &accountRouter{
+	router := &accountRouter{
 		RouterContext{
 			logger:   options.Logger,
 			services: options.Services,
@@ -23,8 +23,9 @@ func setupAccountRoutes(options RouterOptions) {
 
 	routerGroup := options.Handler.Group("/account")
 	{
-		routerGroup.POST("", wrapHandler(options, accRouter.createAccount))
-		routerGroup.GET("/:id", wrapHandler(options, accRouter.getAccount))
+		routerGroup.POST("", wrapHandler(options, router.createAccount))
+		routerGroup.GET("/:id", wrapHandler(options, router.getAccount))
+		routerGroup.PATCH("/:id", wrapHandler(options, router.updateAccount))
 	}
 }
 
@@ -131,4 +132,32 @@ func (a *accountRouter) getAccount(requestContext *gin.Context) (interface{}, *h
 
 	logger.Info("successfully got account")
 	return getAccountResponseBody{account}, nil
+}
+
+type updateAccountRequestBody struct {
+	*entity.Account
+} // @name updateAccountRequestBody
+
+type updateAccountResponseBody struct {
+	*entity.Account
+} // @name updateAccountResponseBody
+
+type updateAccountResponseError struct {
+	Message string `json:"message"`
+	Code    string `json:"code" enums:"user_not_found"`
+} // @name updateAccountResponseError
+
+func (e updateAccountResponseError) Error() *httpResponseError {
+	return &httpResponseError{
+		Type:    ErrorTypeClient,
+		Message: e.Message,
+		Code:    e.Code,
+	}
+}
+
+func (a *accountRouter) updateAccount(requestContext *gin.Context) (interface{}, *httpResponseError) {
+	logger := a.logger.Named("updateAccount").WithContext(requestContext)
+
+	logger.Info("successfully updated account")
+	return nil, nil
 }

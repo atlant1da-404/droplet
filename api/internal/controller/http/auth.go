@@ -11,7 +11,7 @@ type authRouter struct {
 }
 
 func setupAuthRoutes(options RouterOptions) {
-	authRoter := &authRouter{
+	router := &authRouter{
 		RouterContext{
 			logger:   options.Logger,
 			services: options.Services,
@@ -21,8 +21,8 @@ func setupAuthRoutes(options RouterOptions) {
 
 	routerGroup := options.Handler.Group("/auth")
 	{
-		routerGroup.POST("/sign-in", wrapHandler(options, authRoter.signIn))
-		routerGroup.POST("/sign-up", wrapHandler(options, authRoter.signUp))
+		routerGroup.POST("/sign-in", wrapHandler(options, router.signIn))
+		routerGroup.POST("/sign-up", wrapHandler(options, router.signUp))
 	}
 }
 
