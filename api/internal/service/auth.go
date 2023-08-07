@@ -83,10 +83,23 @@ func (a authService) SignUp(ctx context.Context, opt *SignUpOptions) (*SignUpOut
 		return nil, fmt.Errorf("failed to hash user: %w", err)
 	}
 
-	createdUser, err := a.storages.UserStorage.CreateUser(ctx, &entity.User{Email: opt.Email, Password: hashedPassword, Username: opt.Username, MacAddress: opt.MacAddress})
+	createdUser, err := a.storages.UserStorage.CreateUser(ctx, &entity.User{Email: opt.Email, Password: hashedPassword, Username: opt.Username})
 	if err != nil {
 		logger.Error("failed to create user: ", err)
 		return nil, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	account := &entity.Account{
+		UserId: createdUser.Id,
+		AccountSettings: &entity.AccountSettings{
+			Language: "Ukraine",
+		},
+	}
+
+	createdAccount, err := a.storages.AccountStorage.CreateAccount(ctx, account)
+	if err != nil {
+		logger.Error("failed to create account: ", err)
+		return nil, fmt.Errorf("failed to create account: %w", err)
 	}
 
 	accessToken, err := a.auth.GenerateToken(createdUser.Username)
@@ -96,5 +109,5 @@ func (a authService) SignUp(ctx context.Context, opt *SignUpOptions) (*SignUpOut
 	}
 
 	logger.Info("successfully handled sign up")
-	return &SignUpOutput{Id: createdUser.Id, Username: createdUser.Username, Email: createdUser.Email, AccessToken: accessToken}, nil
+	return &SignUpOutput{Id: createdUser.Id, Username: createdUser.Username, Email: createdUser.Email, AccessToken: accessToken, AccountId: createdAccount.Id}, nil
 }

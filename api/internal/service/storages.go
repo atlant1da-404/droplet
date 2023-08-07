@@ -6,7 +6,8 @@ import (
 )
 
 type Storages struct {
-	UserStorage UserStorage
+	UserStorage    UserStorage
+	AccountStorage AccountStorage
 }
 
 type UserStorage interface {
@@ -17,5 +18,17 @@ type UserStorage interface {
 }
 
 type GetUserFilter struct {
-	Email string
+	Email  string
+	UserId string
+}
+
+type AccountStorage interface {
+	// CreateAccount provides creating account in the system.
+	CreateAccount(ctx context.Context, account *entity.Account) (*entity.Account, error)
+	// GetAccount provides logic of getting account from storage.
+	GetAccount(ctx context.Context, filter *GetAccountFilter) (*entity.Account, error)
+}
+
+type GetAccountFilter struct {
+	AccountId string
 }

@@ -27,6 +27,10 @@ func (u userStorage) GetUser(ctx context.Context, filter *service.GetUserFilter)
 		stmt = stmt.Where(entity.User{Email: filter.Email})
 	}
 
+	if filter.UserId != "" {
+		stmt = stmt.Where(entity.User{Id: filter.UserId})
+	}
+
 	var user entity.User
 	err := stmt.
 		WithContext(ctx).

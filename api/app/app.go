@@ -33,13 +33,17 @@ func Run(cfg *config.Config) {
 
 	err = sql.DB.AutoMigrate(
 		&entity.User{},
+		&entity.Account{},
+		&entity.AccountDevices{},
+		&entity.AccountSettings{},
 	)
 	if err != nil {
 		lgr.Fatal("automigration failed", "err", err)
 	}
 
 	storages := service.Storages{
-		UserStorage: storage.NewUserStorage(sql),
+		UserStorage:    storage.NewUserStorage(sql),
+		AccountStorage: storage.NewAccountStorage(sql),
 	}
 
 	databases := map[string]database.Database{
@@ -54,9 +58,9 @@ func Run(cfg *config.Config) {
 		Auth:     auth.NewAuth(),
 	}
 
-	authService := service.NewAuthService(serviceOptions)
 	services := service.Services{
-		AuthService: authService,
+		AuthService:    service.NewAuthService(serviceOptions),
+		AccountService: service.NewAccountService(serviceOptions),
 	}
 
 	// init http handler
