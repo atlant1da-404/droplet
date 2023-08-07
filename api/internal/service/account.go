@@ -22,13 +22,13 @@ func NewAccountService(options *Options) AccountService {
 	}
 }
 
-func (a accountService) CreateAccount(ctx context.Context, opt *CreateAccountOptions) (*CreateAccountOutput, error) {
+func (a accountService) CreateAccount(ctx context.Context, options *CreateAccountOptions) (*CreateAccountOutput, error) {
 	logger := a.logger.
 		Named("CreateAccount").
 		WithContext(ctx).
-		With("body", opt)
+		With("options", options)
 
-	user, err := a.storages.UserStorage.GetUser(ctx, &GetUserFilter{UserId: opt.UserId})
+	user, err := a.storages.UserStorage.GetUser(ctx, &GetUserFilter{UserId: options.UserId})
 	if err != nil {
 		logger.Error("failed to get user: ", err)
 		return nil, fmt.Errorf("failed to get user: %w", err)
@@ -43,14 +43,14 @@ func (a accountService) CreateAccount(ctx context.Context, opt *CreateAccountOpt
 		UserId: user.Id,
 		AccountDevices: []entity.AccountDevices{
 			{
-				Name:       opt.DeviceName,
-				OS:         opt.DeviceOS,
-				MacAddress: opt.DeviceMacAddress,
-				Active:     opt.Active,
+				Name:       options.DeviceName,
+				OS:         options.DeviceOS,
+				MacAddress: options.DeviceMacAddress,
+				Active:     options.Active,
 			},
 		},
 		AccountSettings: &entity.AccountSettings{
-			Language: opt.AccountLanguage,
+			Language: options.AccountLanguage,
 		},
 	}
 	logger = logger.With("account", account)
@@ -66,13 +66,13 @@ func (a accountService) CreateAccount(ctx context.Context, opt *CreateAccountOpt
 	return &CreateAccountOutput{Id: createdAccount.Id, UserId: createdAccount.UserId}, nil
 }
 
-func (a accountService) GetAccount(ctx context.Context, opt *GetAccount) (*entity.Account, error) {
+func (a accountService) GetAccount(ctx context.Context, options *GetAccountOptions) (*entity.Account, error) {
 	logger := a.logger.
 		Named("GetAccount").
 		WithContext(ctx).
-		With("opt", opt)
+		With("options", options)
 
-	account, err := a.storages.AccountStorage.GetAccount(ctx, &GetAccountFilter{AccountId: opt.AccountId})
+	account, err := a.storages.AccountStorage.GetAccount(ctx, &GetAccountFilter{AccountId: options.AccountId})
 	if err != nil {
 		logger.Error("failed to get account: ", err)
 		return nil, fmt.Errorf("failed to get account: %w", err)

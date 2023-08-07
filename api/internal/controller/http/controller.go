@@ -51,6 +51,7 @@ func New(options *Options) {
 	// routes
 	{
 		setupAuthRoutes(routerOptions)
+		setupAccountRoutes(routerOptions)
 	}
 }
 

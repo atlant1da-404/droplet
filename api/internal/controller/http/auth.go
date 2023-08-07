@@ -11,7 +11,7 @@ type authRouter struct {
 }
 
 func setupAuthRoutes(options RouterOptions) {
-	a := &authRouter{
+	authRoter := &authRouter{
 		RouterContext{
 			logger:   options.Logger,
 			services: options.Services,
@@ -19,10 +19,10 @@ func setupAuthRoutes(options RouterOptions) {
 		},
 	}
 
-	g := options.Handler.Group("/auth")
+	routerGroup := options.Handler.Group("/auth")
 	{
-		g.POST("/sign-in", wrapHandler(options, a.signIn))
-		g.POST("/sign-up", wrapHandler(options, a.signUp))
+		routerGroup.POST("/sign-in", wrapHandler(options, authRoter.signIn))
+		routerGroup.POST("/sign-up", wrapHandler(options, authRoter.signUp))
 	}
 }
 
@@ -55,11 +55,11 @@ func (e signInResponseError) Error() *httpResponseError {
 // @Success      200 {object} signInResponseBody
 // @Failure      422,500 {object} signInResponseError
 // @Router       /sign-in [POST]
-func (a *authRouter) signIn(c *gin.Context) (interface{}, *httpResponseError) {
-	logger := a.logger.Named("signIn").WithContext(c)
+func (a *authRouter) signIn(requestContext *gin.Context) (interface{}, *httpResponseError) {
+	logger := a.logger.Named("signIn").WithContext(requestContext)
 
 	var body signInRequestBody
-	err := c.ShouldBindJSON(&body)
+	err := requestContext.ShouldBindJSON(&body)
 	if err != nil {
 		logger.Info("failed to parse request body", "err", err)
 		return nil, &httpResponseError{Type: ErrorTypeClient, Message: "invalid request body", Details: err}
@@ -67,7 +67,7 @@ func (a *authRouter) signIn(c *gin.Context) (interface{}, *httpResponseError) {
 	logger = logger.With("body", body)
 	logger.Debug("parsed request body")
 
-	signed, err := a.services.AuthService.SignIn(c, body.SignInOptions)
+	signed, err := a.services.AuthService.SignIn(requestContext, body.SignInOptions)
 	if err != nil {
 		if errs.IsExpected(err) {
 			logger.Info(err.Error())
@@ -110,11 +110,11 @@ func (e signUpResponseError) Error() *httpResponseError {
 // @Success      200 {object} signUpResponseBody
 // @Failure      422,500 {object} signUpResponseError
 // @Router       /sign-up [POST]
-func (a *authRouter) signUp(c *gin.Context) (interface{}, *httpResponseError) {
-	logger := a.logger.Named("signUp").WithContext(c)
+func (a *authRouter) signUp(requestContext *gin.Context) (interface{}, *httpResponseError) {
+	logger := a.logger.Named("signUp").WithContext(requestContext)
 
 	var body signUpRequestBody
-	err := c.ShouldBindJSON(&body)
+	err := requestContext.ShouldBindJSON(&body)
 	if err != nil {
 		logger.Info("failed to parse request body", "err", err)
 		return nil, &httpResponseError{Type: ErrorTypeClient, Message: "invalid request body", Details: err}
@@ -122,7 +122,7 @@ func (a *authRouter) signUp(c *gin.Context) (interface{}, *httpResponseError) {
 	logger = logger.With("body", body)
 	logger.Debug("parsed request body")
 
-	createdUser, err := a.services.AuthService.SignUp(c, body.SignUpOptions)
+	createdUser, err := a.services.AuthService.SignUp(requestContext, body.SignUpOptions)
 	if err != nil {
 		if errs.IsExpected(err) {
 			logger.Info(err.Error())

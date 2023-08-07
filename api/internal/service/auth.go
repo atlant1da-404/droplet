@@ -28,13 +28,13 @@ func NewAuthService(options *Options) AuthService {
 	}
 }
 
-func (a authService) SignIn(ctx context.Context, opt *SignInOptions) (*SignInOutput, error) {
+func (a authService) SignIn(ctx context.Context, options *SignInOptions) (*SignInOutput, error) {
 	logger := a.logger.
 		Named("SignIn").
 		WithContext(ctx).
-		With("body", opt)
+		With("options", options)
 
-	user, err := a.storages.UserStorage.GetUser(ctx, &GetUserFilter{Email: opt.Email})
+	user, err := a.storages.UserStorage.GetUser(ctx, &GetUserFilter{Email: options.Email})
 	if err != nil {
 		logger.Error("failed to get user: ", err)
 		return nil, fmt.Errorf("failed to get user: %w", err)
@@ -45,7 +45,7 @@ func (a authService) SignIn(ctx context.Context, opt *SignInOptions) (*SignInOut
 	}
 	logger = logger.With("user", user)
 
-	err = a.hash.CompareHash([]byte(user.Password), []byte(opt.Password))
+	err = a.hash.CompareHash([]byte(user.Password), []byte(options.Password))
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, ErrSignInWrongPassword
@@ -61,13 +61,13 @@ func (a authService) SignIn(ctx context.Context, opt *SignInOptions) (*SignInOut
 	return &SignInOutput{AccessToken: accessToken}, nil
 }
 
-func (a authService) SignUp(ctx context.Context, opt *SignUpOptions) (*SignUpOutput, error) {
+func (a authService) SignUp(ctx context.Context, options *SignUpOptions) (*SignUpOutput, error) {
 	logger := a.logger.
 		Named("SignUp").
 		WithContext(ctx).
-		With("body", opt)
+		With("options", options)
 
-	user, err := a.storages.UserStorage.GetUser(ctx, &GetUserFilter{Email: opt.Email})
+	user, err := a.storages.UserStorage.GetUser(ctx, &GetUserFilter{Email: options.Email})
 	if err != nil {
 		logger.Error("failed to get user: ", err)
 		return nil, fmt.Errorf("failed to get user: %w", err)
@@ -77,13 +77,13 @@ func (a authService) SignUp(ctx context.Context, opt *SignUpOptions) (*SignUpOut
 		return nil, ErrSignUpUserAlreadyCreated
 	}
 
-	hashedPassword, err := a.hash.GenerateHash(opt.Password)
+	hashedPassword, err := a.hash.GenerateHash(options.Password)
 	if err != nil {
 		logger.Error("failed to hash user password: ", err)
 		return nil, fmt.Errorf("failed to hash user: %w", err)
 	}
 
-	createdUser, err := a.storages.UserStorage.CreateUser(ctx, &entity.User{Email: opt.Email, Password: hashedPassword, Username: opt.Username})
+	createdUser, err := a.storages.UserStorage.CreateUser(ctx, &entity.User{Email: options.Email, Password: hashedPassword, Username: options.Username})
 	if err != nil {
 		logger.Error("failed to create user: ", err)
 		return nil, fmt.Errorf("failed to create user: %w", err)

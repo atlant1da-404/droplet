@@ -31,9 +31,9 @@ type serviceContext struct {
 
 type AuthService interface {
 	// SignIn provides logic of authentication of clients and returns access and refresh tokens.
-	SignIn(ctx context.Context, opt *SignInOptions) (*SignInOutput, error)
+	SignIn(ctx context.Context, options *SignInOptions) (*SignInOutput, error)
 	// SignUp provides logic of creating the clients and returns access and refresh tokens.
-	SignUp(ctx context.Context, opt *SignUpOptions) (*SignUpOutput, error)
+	SignUp(ctx context.Context, options *SignUpOptions) (*SignUpOutput, error)
 }
 
 type SignInOptions struct {
@@ -68,9 +68,9 @@ var (
 
 type AccountService interface {
 	// CreateAccount provides logic of creating account for clients.
-	CreateAccount(ctx context.Context, opt *CreateAccountOptions) (*CreateAccountOutput, error)
+	CreateAccount(ctx context.Context, options *CreateAccountOptions) (*CreateAccountOutput, error)
 	// GetAccount provides logic of getting account via accountId.
-	GetAccount(ctx context.Context, opt *GetAccount) (*entity.Account, error)
+	GetAccount(ctx context.Context, options *GetAccountOptions) (*entity.Account, error)
 }
 
 type CreateAccountOptions struct {
@@ -87,7 +87,7 @@ type CreateAccountOutput struct {
 	UserId string `json:"userId"`
 }
 
-type GetAccount struct {
+type GetAccountOptions struct {
 	AccountId string `json:"accountId"`
 }
 

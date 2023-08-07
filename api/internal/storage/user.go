@@ -19,6 +19,15 @@ func NewUserStorage(postgresql *database.PostgreSQL) service.UserStorage {
 	return &userStorage{postgresql}
 }
 
+func (u userStorage) CreateUser(ctx context.Context, user *entity.User) (*entity.User, error) {
+	err := u.DB.WithContext(ctx).Create(user).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (u userStorage) GetUser(ctx context.Context, filter *service.GetUserFilter) (*entity.User, error) {
 	stmt := u.DB.Preload(clause.Associations)
 
@@ -43,13 +52,4 @@ func (u userStorage) GetUser(ctx context.Context, filter *service.GetUserFilter)
 	}
 
 	return &user, nil
-}
-
-func (u userStorage) CreateUser(ctx context.Context, user *entity.User) (*entity.User, error) {
-	err := u.DB.WithContext(ctx).Create(user).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return user, nil
 }

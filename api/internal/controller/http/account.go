@@ -13,7 +13,7 @@ type accountRouter struct {
 }
 
 func setupAccountRoutes(options RouterOptions) {
-	a := &accountRouter{
+	accRouter := &accountRouter{
 		RouterContext{
 			logger:   options.Logger,
 			services: options.Services,
@@ -21,10 +21,10 @@ func setupAccountRoutes(options RouterOptions) {
 		},
 	}
 
-	g := options.Handler.Group("/account")
+	routerGroup := options.Handler.Group("/account")
 	{
-		g.POST("", wrapHandler(options, a.createAccount))
-		g.GET("/:id", wrapHandler(options, a.getAccount))
+		routerGroup.POST("", wrapHandler(options, accRouter.createAccount))
+		routerGroup.GET("/:id", wrapHandler(options, accRouter.getAccount))
 	}
 }
 
@@ -57,11 +57,11 @@ func (e createAccountResponseError) Error() *httpResponseError {
 // @Success      200 {object} createAccountResponseBody
 // @Failure      422,500 {object} createAccountResponseError
 // @Router       /account [POST]
-func (a *accountRouter) createAccount(c *gin.Context) (interface{}, *httpResponseError) {
-	logger := a.logger.Named("createAccount").WithContext(c)
+func (a *accountRouter) createAccount(requestContext *gin.Context) (interface{}, *httpResponseError) {
+	logger := a.logger.Named("createAccount").WithContext(requestContext)
 
 	var body createAccountRequestBody
-	err := c.ShouldBindJSON(&body)
+	err := requestContext.ShouldBindJSON(&body)
 	if err != nil {
 		logger.Info("failed to parse request body", "err", err)
 		return nil, &httpResponseError{Type: ErrorTypeClient, Message: "invalid request body", Details: err}
@@ -69,7 +69,7 @@ func (a *accountRouter) createAccount(c *gin.Context) (interface{}, *httpRespons
 	logger = logger.With("body", body)
 	logger.Debug("parsed request body")
 
-	createdAccount, err := a.services.AccountService.CreateAccount(c, body.CreateAccountOptions)
+	createdAccount, err := a.services.AccountService.CreateAccount(requestContext, body.CreateAccountOptions)
 	if err != nil {
 		if errs.IsExpected(err) {
 			logger.Info(err.Error())
@@ -109,10 +109,10 @@ func (e getAccountResponseError) Error() *httpResponseError {
 // @Success      200 {object} getAccountResponseBody
 // @Failure      422,500 {object} getAccountResponseError
 // @Router       /account/{id} [PUT]
-func (a *accountRouter) getAccount(c *gin.Context) (interface{}, *httpResponseError) {
-	logger := a.logger.Named("getAccount").WithContext(c)
+func (a *accountRouter) getAccount(requestContext *gin.Context) (interface{}, *httpResponseError) {
+	logger := a.logger.Named("getAccount").WithContext(requestContext)
 
-	accountId := c.Param("id")
+	accountId := requestContext.Param("id")
 	if _, ok := uuid.Parse(accountId); ok != nil {
 		logger.Info("invalid account id parameter", "param", accountId)
 		return nil, &httpResponseError{Type: ErrorTypeClient, Message: "invalid account id parameter"}
@@ -120,7 +120,7 @@ func (a *accountRouter) getAccount(c *gin.Context) (interface{}, *httpResponseEr
 	logger = logger.With("accountId", accountId)
 	logger.Debug("parsed params")
 
-	account, err := a.services.AccountService.GetAccount(c, &service.GetAccount{AccountId: accountId})
+	account, err := a.services.AccountService.GetAccount(requestContext, &service.GetAccountOptions{AccountId: accountId})
 	if err != nil {
 		if errs.IsExpected(err) {
 			logger.Info(err.Error())
