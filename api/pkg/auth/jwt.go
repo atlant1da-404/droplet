@@ -45,7 +45,7 @@ func (s *jwtAuthenticator) GenerateToken(username string) (string, error) {
 	return signedToken, nil
 }
 
-func (s *jwtAuthenticator) ParseToken(accessToken string) (bool, error) {
+func (s *jwtAuthenticator) ParseToken(accessToken string) error {
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -55,12 +55,12 @@ func (s *jwtAuthenticator) ParseToken(accessToken string) (bool, error) {
 		return []byte(s.signKey), nil
 	})
 	if err != nil {
-		return false, fmt.Errorf("failed to parse jwt token: %w", err)
+		return fmt.Errorf("failed to parse jwt token: %w", err)
 	}
 
 	if !token.Valid {
-		return false, fmt.Errorf("token is not valid")
+		return fmt.Errorf("token is not valid")
 	}
 
-	return true, nil
+	return nil
 }

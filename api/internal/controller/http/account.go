@@ -23,9 +23,9 @@ func setupAccountRoutes(options RouterOptions) {
 
 	routerGroup := options.Handler.Group("/account")
 	{
-		routerGroup.POST("", wrapHandler(options, router.createAccount))
-		routerGroup.GET("/:id", wrapHandler(options, router.getAccount))
-		routerGroup.PATCH("/:id", wrapHandler(options, router.updateAccount))
+		routerGroup.POST("", authMiddleware(options), wrapHandler(options, router.createAccount))
+		routerGroup.GET("/:id", authMiddleware(options), wrapHandler(options, router.getAccount))
+		routerGroup.PATCH("/:id", authMiddleware(options), wrapHandler(options, router.updateAccount))
 	}
 }
 

@@ -98,3 +98,18 @@ func (a authService) SignUp(ctx context.Context, options *SignUpOptions) (*SignU
 	logger.Info("successfully handled sign up")
 	return &SignUpOutput{Id: createdUser.Id, Username: createdUser.Username, Email: createdUser.Email, AccessToken: accessToken}, nil
 }
+
+func (a authService) VerifyToken(ctx context.Context, options *VerifyTokenOptions) error {
+	logger := a.logger.
+		Named("VerifyToken").
+		WithContext(ctx)
+
+	err := a.auth.ParseToken(options.AccessToken)
+	if err != nil {
+		logger.Info("failed to parse token: ", err)
+		return fmt.Errorf("invalid token")
+	}
+
+	logger.Info("successfully handled auth token")
+	return nil
+}

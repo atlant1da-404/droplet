@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"net/http"
 	"runtime/debug"
+	"strings"
 )
 
 type Options struct {
@@ -147,4 +148,43 @@ func wrapHandler(options RouterOptions, handler func(c *gin.Context) (interface{
 		lgr.Info("request handled")
 		c.JSON(http.StatusOK, body)
 	}
+}
+
+func authMiddleware(routerOptions RouterOptions) gin.HandlerFunc {
+	logger := routerOptions.Logger.Named("authMiddleware")
+	return wrapHandler(routerOptions, func(requestContext *gin.Context) (interface{}, *httpResponseError) {
+		tokenStringRaw := requestContext.GetHeader("Authorization")
+
+		tokenString, err := getAuthToken(tokenStringRaw)
+		if err != nil {
+			logger.Info(err.Error())
+			return nil, &httpResponseError{Type: ErrorTypeClient, Message: err.Error()}
+		}
+		logger.Debug("got tokenString")
+
+		err = routerOptions.Services.AuthService.VerifyToken(requestContext, &service.VerifyTokenOptions{AccessToken: tokenString})
+		if err != nil {
+			logger.Info(err.Error())
+			return nil, &httpResponseError{Type: ErrorTypeClient, Message: err.Error(), Details: "invalid_token"}
+		}
+
+		logger.Info("successfully authenticated user")
+		return nil, nil
+	})
+}
+
+func getAuthToken(rawToken string) (string, error) {
+	if rawToken == "" {
+		return "", fmt.Errorf("empty auth token")
+	}
+
+	// Split Bearer and token
+	splitRawToken := strings.Split(rawToken, " ")
+	if len(splitRawToken) != 2 {
+		return "", fmt.Errorf("malformed auth token")
+	}
+
+	// Get token
+	token := splitRawToken[1]
+	return token, nil
 }
