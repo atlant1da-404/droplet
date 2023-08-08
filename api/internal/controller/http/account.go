@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"github.com/atlant1da-404/droplet/internal/entity"
 	"github.com/atlant1da-404/droplet/internal/service"
 	"github.com/atlant1da-404/droplet/pkg/errs"
@@ -121,7 +122,24 @@ func (a *accountRouter) getAccount(requestContext *gin.Context) (interface{}, *h
 	logger = logger.With("accountId", accountId)
 	logger.Debug("parsed params")
 
-	account, err := a.services.AccountService.GetAccount(requestContext, &service.GetAccountOptions{AccountId: accountId})
+	requestUserId := requestContext.Value("userId")
+	if requestUserId == nil {
+		logger.Info("user not found")
+		return nil, &httpResponseError{Type: ErrorTypeClient, Message: "user not found"}
+	}
+	logger = logger.With("userId", requestUserId)
+	logger.Debug("got userId")
+
+	userId := fmt.Sprint(requestUserId)
+
+	if _, ok := uuid.Parse(userId); ok != nil {
+		logger.Info("invalid user id parameter")
+		return nil, &httpResponseError{Type: ErrorTypeClient, Message: "invalid user id parameter"}
+	}
+	logger = logger.With("userId", userId)
+	logger.Debug("validated uuid userId")
+
+	account, err := a.services.AccountService.GetAccount(requestContext, &service.GetAccountOptions{AccountId: accountId, UserId: userId})
 	if err != nil {
 		if errs.IsExpected(err) {
 			logger.Info(err.Error())

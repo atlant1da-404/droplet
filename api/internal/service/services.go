@@ -35,7 +35,7 @@ type AuthService interface {
 	// SignUp provides logic of creating the clients and returns access and refresh tokens.
 	SignUp(ctx context.Context, options *SignUpOptions) (*SignUpOutput, error)
 	// VerifyToken provides logic of validating provided authorization token.
-	VerifyToken(ctx context.Context, options *VerifyTokenOptions) error
+	VerifyToken(ctx context.Context, options *VerifyTokenOptions) (*VerifyTokenOutput, error)
 }
 
 type SignInOptions struct {
@@ -63,6 +63,11 @@ type SignUpOutput struct {
 
 type VerifyTokenOptions struct {
 	AccessToken string
+}
+
+type VerifyTokenOutput struct {
+	Username string
+	UserId   string
 }
 
 var (
@@ -94,6 +99,7 @@ type CreateAccountOutput struct {
 
 type GetAccountOptions struct {
 	AccountId string `json:"accountId"`
+	UserId    string `json:"userId"`
 }
 
 var (

@@ -162,11 +162,14 @@ func authMiddleware(routerOptions RouterOptions) gin.HandlerFunc {
 		}
 		logger.Debug("got tokenString")
 
-		err = routerOptions.Services.AuthService.VerifyToken(requestContext, &service.VerifyTokenOptions{AccessToken: tokenString})
+		claims, err := routerOptions.Services.AuthService.VerifyToken(requestContext, &service.VerifyTokenOptions{AccessToken: tokenString})
 		if err != nil {
 			logger.Info(err.Error())
 			return nil, &httpResponseError{Type: ErrorTypeClient, Message: err.Error(), Details: "invalid_token"}
 		}
+
+		requestContext.Set("userId", claims.UserId)
+		requestContext.Set("username", claims.Username)
 
 		logger.Info("successfully authenticated user")
 		return nil, nil

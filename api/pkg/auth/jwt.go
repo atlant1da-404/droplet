@@ -17,15 +17,17 @@ func NewAuth() Authenticator {
 
 type MyCustomClaims struct {
 	Username string `json:"username"`
+	UserId   string `json:"userId"`
 	jwt.RegisteredClaims
 }
 
-func (s *jwtAuthenticator) GenerateToken(username string) (string, error) {
+func (s *jwtAuthenticator) GenerateToken(tokenClaims *GenerateTokenClaimsOptions) (string, error) {
 	mySigningKey := []byte(s.signKey)
 
 	claims := MyCustomClaims{
-		username,
-		jwt.RegisteredClaims{
+		Username: tokenClaims.UserName,
+		UserId:   tokenClaims.UserId,
+		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(560 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
@@ -45,7 +47,7 @@ func (s *jwtAuthenticator) GenerateToken(username string) (string, error) {
 	return signedToken, nil
 }
 
-func (s *jwtAuthenticator) ParseToken(accessToken string) error {
+func (s *jwtAuthenticator) ParseToken(accessToken string) (*ParseTokenClaimsOutput, error) {
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -55,12 +57,23 @@ func (s *jwtAuthenticator) ParseToken(accessToken string) error {
 		return []byte(s.signKey), nil
 	})
 	if err != nil {
-		return fmt.Errorf("failed to parse jwt token: %w", err)
+		return nil, fmt.Errorf("failed to parse jwt token: %w", err)
 	}
 
 	if !token.Valid {
-		return fmt.Errorf("token is not valid")
+		return nil, fmt.Errorf("token is not valid")
 	}
 
-	return nil
+	claims := token.Claims.(jwt.MapClaims)
+
+	username := claims["username"]
+	if username == nil {
+		return nil, fmt.Errorf("token is not valid")
+	}
+	userId := claims["userId"]
+	if userId == nil {
+		return nil, fmt.Errorf("token is not valid")
+	}
+
+	return &ParseTokenClaimsOutput{UserId: fmt.Sprint(userId), Username: fmt.Sprint(username)}, nil
 }

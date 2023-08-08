@@ -72,7 +72,7 @@ func (a accountService) GetAccount(ctx context.Context, options *GetAccountOptio
 		WithContext(ctx).
 		With("options", options)
 
-	account, err := a.storages.AccountStorage.GetAccount(ctx, &GetAccountFilter{AccountId: options.AccountId})
+	account, err := a.storages.AccountStorage.GetAccount(ctx, &GetAccountFilter{AccountId: options.AccountId, UserId: options.UserId})
 	if err != nil {
 		logger.Error("failed to get account: ", err)
 		return nil, fmt.Errorf("failed to get account: %w", err)

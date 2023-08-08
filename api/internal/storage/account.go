@@ -35,6 +35,10 @@ func (u *accountStorage) GetAccount(ctx context.Context, filter *service.GetAcco
 		stmt = stmt.Where(entity.Account{Id: filter.AccountId})
 	}
 
+	if filter.UserId != "" {
+		stmt = stmt.Where(entity.Account{UserId: filter.UserId})
+	}
+
 	var account entity.Account
 	err := stmt.
 		WithContext(ctx).

@@ -51,7 +51,7 @@ func (a authService) SignIn(ctx context.Context, options *SignInOptions) (*SignI
 		return nil, ErrSignInWrongPassword
 	}
 
-	accessToken, err := a.auth.GenerateToken(user.Username)
+	accessToken, err := a.auth.GenerateToken(&auth.GenerateTokenClaimsOptions{UserName: user.Username, UserId: user.Id})
 	if err != nil {
 		logger.Error("failed to generate token for user: ", err)
 		return nil, fmt.Errorf("failed to generate token for user: %w", err)
@@ -89,7 +89,7 @@ func (a authService) SignUp(ctx context.Context, options *SignUpOptions) (*SignU
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
-	accessToken, err := a.auth.GenerateToken(createdUser.Username)
+	accessToken, err := a.auth.GenerateToken(&auth.GenerateTokenClaimsOptions{UserName: createdUser.Username, UserId: createdUser.Id})
 	if err != nil {
 		logger.Error("failed to generate token for user: ", err)
 		return nil, fmt.Errorf("failed to generate token for user: %w", err)
@@ -99,17 +99,17 @@ func (a authService) SignUp(ctx context.Context, options *SignUpOptions) (*SignU
 	return &SignUpOutput{Id: createdUser.Id, Username: createdUser.Username, Email: createdUser.Email, AccessToken: accessToken}, nil
 }
 
-func (a authService) VerifyToken(ctx context.Context, options *VerifyTokenOptions) error {
+func (a authService) VerifyToken(ctx context.Context, options *VerifyTokenOptions) (*VerifyTokenOutput, error) {
 	logger := a.logger.
 		Named("VerifyToken").
 		WithContext(ctx)
 
-	err := a.auth.ParseToken(options.AccessToken)
+	claims, err := a.auth.ParseToken(options.AccessToken)
 	if err != nil {
 		logger.Info("failed to parse token: ", err)
-		return fmt.Errorf("invalid token")
+		return nil, fmt.Errorf("invalid token")
 	}
 
 	logger.Info("successfully handled auth token")
-	return nil
+	return &VerifyTokenOutput{Username: claims.Username, UserId: claims.UserId}, nil
 }

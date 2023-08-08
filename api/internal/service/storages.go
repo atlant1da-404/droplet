@@ -31,4 +31,5 @@ type AccountStorage interface {
 
 type GetAccountFilter struct {
 	AccountId string
+	UserId    string
 }
