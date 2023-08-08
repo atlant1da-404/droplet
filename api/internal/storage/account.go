@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"github.com/a631807682/zerofield"
 	"github.com/atlant1da-404/droplet/internal/entity"
 	"github.com/atlant1da-404/droplet/internal/service"
 	"github.com/atlant1da-404/droplet/pkg/database"
@@ -52,4 +53,28 @@ func (u *accountStorage) GetAccount(ctx context.Context, filter *service.GetAcco
 	}
 
 	return &account, nil
+}
+
+func (u *accountStorage) UpdateAccount(ctx context.Context, account *entity.Account) (*entity.Account, error) {
+	err := u.DB.
+		Session(&gorm.Session{FullSaveAssociations: true}).
+		Scopes(zerofield.UpdateScopes()).
+		Where(&entity.Account{Id: account.Id}).
+		Updates(account).
+		Error
+	if err != nil {
+		return nil, err
+	}
+
+	var updatedAccount entity.Account
+	err = u.DB.
+		Preload(clause.Associations).
+		WithContext(ctx).
+		Take(&updatedAccount, "id = ?", account.Id).
+		Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &updatedAccount, nil
 }

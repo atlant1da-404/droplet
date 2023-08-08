@@ -110,7 +110,7 @@ func (e getAccountResponseError) Error() *httpResponseError {
 // @Param        id path string true "Account ID"
 // @Success      200 {object} getAccountResponseBody
 // @Failure      422,500 {object} getAccountResponseError
-// @Router       /account/{id} [PUT]
+// @Router       /account/{id} [GET]
 func (a *accountRouter) getAccount(requestContext *gin.Context) (interface{}, *httpResponseError) {
 	logger := a.logger.Named("getAccount").WithContext(requestContext)
 
@@ -131,7 +131,6 @@ func (a *accountRouter) getAccount(requestContext *gin.Context) (interface{}, *h
 	logger.Debug("got userId")
 
 	userId := fmt.Sprint(requestUserId)
-
 	if _, ok := uuid.Parse(userId); ok != nil {
 		logger.Info("invalid user id parameter")
 		return nil, &httpResponseError{Type: ErrorTypeClient, Message: "invalid user id parameter"}
@@ -152,30 +151,69 @@ func (a *accountRouter) getAccount(requestContext *gin.Context) (interface{}, *h
 	return getAccountResponseBody{account}, nil
 }
 
-type updateAccountRequestBody struct {
-	*entity.Account
-} // @name updateAccountRequestBody
-
 type updateAccountResponseBody struct {
 	*entity.Account
 } // @name updateAccountResponseBody
 
-type updateAccountResponseError struct {
-	Message string `json:"message"`
-	Code    string `json:"code" enums:"user_not_found"`
-} // @name updateAccountResponseError
-
-func (e updateAccountResponseError) Error() *httpResponseError {
-	return &httpResponseError{
-		Type:    ErrorTypeClient,
-		Message: e.Message,
-		Code:    e.Code,
-	}
-}
-
+// @id           UpdateAccount
+// @Summary      Updates account entity account.
+// @Accept       application/json
+// @Produce      application/json
+// @Param        id path string true "Account ID"
+// @Success      200 {object} updateAccountResponseBody
+// @Failure      422,500 {object} httpResponseError
+// @Router       /account/{id} [PATCH]
 func (a *accountRouter) updateAccount(requestContext *gin.Context) (interface{}, *httpResponseError) {
 	logger := a.logger.Named("updateAccount").WithContext(requestContext)
 
+	accountId := requestContext.Param("id")
+	if _, ok := uuid.Parse(accountId); ok != nil {
+		logger.Info("invalid account id parameter", "param", accountId)
+		return nil, &httpResponseError{Type: ErrorTypeClient, Message: "invalid account id parameter"}
+	}
+	logger = logger.With("accountId", accountId)
+	logger.Debug("parsed params")
+
+	requestUserId := requestContext.Value("userId")
+	if requestUserId == nil {
+		logger.Info("user not found")
+		return nil, &httpResponseError{Type: ErrorTypeClient, Message: "user not found"}
+	}
+	logger = logger.With("userId", requestUserId)
+	logger.Debug("got userId")
+
+	userId := fmt.Sprint(requestUserId)
+	if _, ok := uuid.Parse(userId); ok != nil {
+		logger.Info("invalid user id parameter")
+		return nil, &httpResponseError{Type: ErrorTypeClient, Message: "invalid user id parameter"}
+	}
+	logger = logger.With("userId", userId)
+	logger.Debug("validated uuid userId")
+
+	account, err := a.services.AccountService.GetAccount(requestContext, &service.GetAccountOptions{AccountId: accountId, UserId: userId})
+	if err != nil {
+		if errs.IsExpected(err) {
+			logger.Info(err.Error())
+			return nil, getAccountResponseError{Message: err.Error(), Code: errs.GetCode(err)}.Error()
+		}
+	}
+	logger = logger.With("account", account)
+
+	err = requestContext.ShouldBindJSON(&account)
+	if err != nil {
+		logger.Info("failed to parse request body", "err", err)
+		return nil, &httpResponseError{Type: ErrorTypeClient, Message: "invalid request body", Details: err}
+	}
+	logger = logger.With("account", account)
+	logger.Debug("parsed request body")
+
+	updatedAccount, err := a.services.AccountService.UpdateAccount(requestContext, account)
+	if err != nil {
+		logger.Error("failed to update account: ", err)
+		return nil, &httpResponseError{Type: ErrorTypeServer, Message: "failed to update account", Details: err}
+	}
+	logger = logger.With("updatedAccount", updatedAccount)
+
 	logger.Info("successfully updated account")
-	return nil, nil
+	return updateAccountResponseBody{updatedAccount}, nil
 }

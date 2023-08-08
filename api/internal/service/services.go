@@ -81,6 +81,8 @@ type AccountService interface {
 	CreateAccount(ctx context.Context, options *CreateAccountOptions) (*CreateAccountOutput, error)
 	// GetAccount provides logic of getting account via accountId.
 	GetAccount(ctx context.Context, options *GetAccountOptions) (*entity.Account, error)
+	// UpdateAccount provides logic of updating existing account.
+	UpdateAccount(ctx context.Context, account *entity.Account) (*entity.Account, error)
 }
 
 type CreateAccountOptions struct {

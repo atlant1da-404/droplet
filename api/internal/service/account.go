@@ -86,3 +86,20 @@ func (a accountService) GetAccount(ctx context.Context, options *GetAccountOptio
 	logger.Info("successfully got account")
 	return account, nil
 }
+
+func (a accountService) UpdateAccount(ctx context.Context, account *entity.Account) (*entity.Account, error) {
+	logger := a.logger.
+		Named("UpdateAccount").
+		WithContext(ctx).
+		With("account", account)
+
+	updatedAccount, err := a.storages.AccountStorage.UpdateAccount(ctx, account)
+	if err != nil {
+		logger.Error("failed to update account: ", err)
+		return nil, fmt.Errorf("failed to update account: %w", err)
+	}
+	logger = logger.With("updatedAccount", updatedAccount)
+
+	logger.Info("successfully updated account")
+	return updatedAccount, nil
+}

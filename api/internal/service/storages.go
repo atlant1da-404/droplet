@@ -27,6 +27,8 @@ type AccountStorage interface {
 	CreateAccount(ctx context.Context, account *entity.Account) (*entity.Account, error)
 	// GetAccount provides logic of getting account from storage.
 	GetAccount(ctx context.Context, filter *GetAccountFilter) (*entity.Account, error)
+	// UpdateAccount provides logic of updating account in storage.
+	UpdateAccount(ctx context.Context, account *entity.Account) (*entity.Account, error)
 }
 
 type GetAccountFilter struct {
