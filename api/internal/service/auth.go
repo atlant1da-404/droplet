@@ -40,7 +40,7 @@ func (a authService) SignIn(ctx context.Context, options *SignInOptions) (*SignI
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 	if user == nil {
-		logger.Info("user already created")
+		logger.Info("user not found")
 		return nil, ErrSignInUserNotFound
 	}
 	logger = logger.With("user", user)

@@ -13,6 +13,7 @@ import (
 type Services struct {
 	AuthService    AuthService
 	AccountService AccountService
+	NodeService    NodeService
 }
 
 type Options struct {
@@ -108,3 +109,17 @@ var (
 	ErrCreateAccountUserNotFound = errs.New("user not found", "user_not_found")
 	ErrGetAccountAccountNotFound = errs.New("account not found", "account_not_found")
 )
+
+type NodeService interface {
+	// CreateNode provides logic of creating new node.
+	CreateNode(ctx context.Context, options *CreateNodeOptions) (*CreateNodeOutput, error)
+}
+
+type CreateNodeOptions struct {
+	SenderEmail   string `json:"senderEmail"`
+	ReceiverEmail string `json:"receiverEmail"`
+}
+
+type CreateNodeOutput struct {
+	Id string
+}

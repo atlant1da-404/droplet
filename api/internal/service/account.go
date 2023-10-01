@@ -17,7 +17,7 @@ func NewAccountService(options *Options) AccountService {
 		serviceContext: serviceContext{
 			storages: options.Storages,
 			config:   options.Config,
-			logger:   options.Logger.Named("AuthService"),
+			logger:   options.Logger.Named("AccountService"),
 		},
 	}
 }

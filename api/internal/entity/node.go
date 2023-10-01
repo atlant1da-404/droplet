@@ -8,5 +8,5 @@ type Node struct {
 	ReceiverMacAddress string `json:"ReceiverMacAddress"`
 }
 
-// Sender(Up server) - Backend - Receiver
+// Sender(Up server) - Backend(notification) - Receiver
 // Receiver send request to get file - Sender

@@ -8,6 +8,7 @@ import (
 type Storages struct {
 	UserStorage    UserStorage
 	AccountStorage AccountStorage
+	NodeStorage    NodeStorage
 }
 
 type UserStorage interface {
@@ -34,4 +35,9 @@ type AccountStorage interface {
 type GetAccountFilter struct {
 	AccountId string
 	UserId    string
+}
+
+type NodeStorage interface {
+	// CreateNode provides creating new node in system.
+	CreateNode(ctx context.Context, node *entity.Node) (*entity.Node, error)
 }
